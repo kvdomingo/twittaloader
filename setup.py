@@ -1,6 +1,6 @@
 import sys
-from twittaloader.__main__ import main
+from twittaloader.__main__ import Twittaloader
 
 
 if __name__ == "__main__":
-    main(sys.argv[1])
+    Twittaloader(sys.argv[1]).main()
