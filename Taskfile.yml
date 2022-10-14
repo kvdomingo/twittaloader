@@ -1,8 +1,14 @@
 version: '3'
 
 tasks:
-  make-builder:
-    desc: Make builder image
+  default:
+    desc: Build standalone executables for Windows and Linux
+    cmds:
+      - pyinstaller -F --clean --name twittaloader setup.py
+      - docker run -v "$(pwd)":/twittaloader --rm --name twittaloader-makelinux kvdomingo/twittaloader-make-linux:latest
+
+  build-builder:
+    desc: Build builder image
     cmds:
       - docker build -t kvdomingo/twittaloader-make-linux:latest .
 
@@ -11,13 +17,13 @@ tasks:
     cmds:
       - docker push kvdomingo/twittaloader-make-linux:latest
 
+  make-builder:
+    desc: Build and push builder image
+    cmds:
+      - task build-builder
+      - task publish-builder
+
   build:
     desc: Build standalone executable
     cmds:
       - pyinstaller -F --clean --name twittaloader setup.py
-
-  build-all:
-    desc: Build standalone executables for Windows and Linux
-    cmds:
-      - pyinstaller -F --clean --name twittaloader setup.py
-      - docker run -v "$(pwd)":/twittaloader --rm --name twittaloader-makelinux kvdomingo/twittaloader-make-linux:latest
