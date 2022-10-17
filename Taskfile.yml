@@ -4,7 +4,7 @@ tasks:
   default:
     desc: Build standalone executables for Windows and Linux
     cmds:
-      - pyinstaller -F --clean --name twittaloader setup.py
+      - poetry run pyinstaller -F --clean --name twittaloader setup.py
       - docker run -v "$(pwd)":/twittaloader --rm --name twittaloader-makelinux kvdomingo/twittaloader-make-linux:latest
 
   build-builder:
