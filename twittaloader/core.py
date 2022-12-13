@@ -1,13 +1,18 @@
 import json
+import re
+import urllib.parse
 from datetime import datetime
 from getpass import getpass
 from pathlib import Path
+from typing import Iterable
 
 import requests
 from tqdm import tqdm
 
 from .config import BASE_URL_V2
 from .log import logger
+
+NUMERIC_RE = re.compile(r"^\d+$", re.I)
 
 
 @logger.catch
@@ -19,9 +24,26 @@ class Twittaloader:
     default_user_fields = ["username"]
     config = {}
 
-    def __init__(self, *tweet_ids: str):
-        self.tweet_ids = tweet_ids
+    def __init__(self, *tweet_args: str):
+        if len(tweet_args) == 0:
+            raise ValueError("Missing args")
+        self.tweet_ids = self.parse_tweet_args(tweet_args)
         self.get_tokens()
+
+    @staticmethod
+    def parse_tweet_args(tweet_args: Iterable[str]) -> list[str]:
+        def _func(arg):
+            if re.match(NUMERIC_RE, arg):
+                return tweet_args
+            elif arg.startswith("https://"):
+                pr = urllib.parse.urlparse(arg)
+                id_ = str(pr.path.split("/")[-1])
+                return id_
+            else:
+                raise ValueError(f"Unrecognized format: {arg}")
+
+        parsed = list(map(_func, tweet_args))
+        return parsed
 
     def get_tokens(self):
         if not self.config_location.exists():

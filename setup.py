@@ -1,4 +1,5 @@
-from twittaloader.__main__ import main
+from twittaloader.core import Twittaloader
 
 if __name__ == "__main__":
-    main()
+    tl = Twittaloader()
+    tl()

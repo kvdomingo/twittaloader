@@ -1,29 +1,11 @@
 version: '3'
 
+env:
+  NAME: twittaloader
+
 tasks:
   default:
     desc: Build standalone executables for Windows and Linux
     cmds:
-      - poetry run pyinstaller -F --clean --name twittaloader setup.py
-      - docker run -v "$(pwd)":/twittaloader --rm --name twittaloader-makelinux kvdomingo/twittaloader-make-linux:latest
-
-  build-builder:
-    desc: Build builder image
-    cmds:
-      - docker build -t kvdomingo/twittaloader-make-linux:latest .
-
-  publish-builder:
-    desc: Push builder image to Docker Hub
-    cmds:
-      - docker push kvdomingo/twittaloader-make-linux:latest
-
-  make-builder:
-    desc: Build and push builder image
-    cmds:
-      - task build-builder
-      - task publish-builder
-
-  build:
-    desc: Build standalone executable
-    cmds:
-      - pyinstaller -F --clean --name twittaloader setup.py
+      - poetry run pyinstaller -F --clean --name {{.NAME}} setup.py
+      - docker run -v "$(pwd)":/build --rm --env NAME={{.NAME}} --name {{.NAME}}-make-linux --workdir /build kvdomingo/py-cli-builder:latest
