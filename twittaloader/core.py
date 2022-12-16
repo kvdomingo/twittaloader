@@ -34,10 +34,10 @@ class Twittaloader:
     def parse_tweet_args(tweet_args: Iterable[str]) -> list[str]:
         def _func(arg):
             if re.match(NUMERIC_RE, arg):
-                return tweet_args
+                return arg
             elif arg.startswith("https://"):
                 pr = urllib.parse.urlparse(arg)
-                id_ = str(pr.path.split("/")[-1])
+                id_: str = pr.path.split("/")[-1]
                 return id_
             else:
                 raise ValueError(f"Unrecognized format: {arg}")
