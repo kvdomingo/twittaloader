@@ -1,1 +1,1 @@
-from loguru import logger
+from loguru import logger  # noqa: F401

@@ -78,9 +78,10 @@ class Twittaloader:
                 params=self.get_default_params(),
             )
             data = res.json()
-            datetime_string = datetime.strptime(data["data"]["created_at"], "%Y-%m-%dT%H:%M:%S.%fZ").strftime(
-                "%Y-%m-%d_%H-%M-%S"
-            )
+            logger.debug(data)
+            datetime_string = datetime.strptime(
+                data["data"]["created_at"], "%Y-%m-%dT%H:%M:%S.%fZ"
+            ).strftime("%Y-%m-%d_%H-%M-%S")
         else:
             res = requests.get(
                 f"{BASE_URL_V2}/tweets",
@@ -91,9 +92,9 @@ class Twittaloader:
                 },
             )
             data = res.json()
-            datetime_string = datetime.strptime(data["data"][0]["created_at"], "%Y-%m-%dT%H:%M:%S.%fZ").strftime(
-                "%Y-%m-%d_%H-%M-%S"
-            )
+            datetime_string = datetime.strptime(
+                data["data"][0]["created_at"], "%Y-%m-%dT%H:%M:%S.%fZ"
+            ).strftime("%Y-%m-%d_%H-%M-%S")
         if not res.ok:
             return logger.error(f"{res.status_code}:\n{res.text}")
 
