@@ -1,7 +1,6 @@
 import json
 import re
 import urllib.parse
-from datetime import datetime
 from getpass import getpass
 from pathlib import Path
 from typing import Iterable
@@ -75,15 +74,11 @@ class Twittaloader:
         if len(tweet_ids) == 1:
             res = self.client.get_tweet(tweet_ids[0], **self.get_default_params())
             data = res.data
-            datetime_string = datetime.strptime(
-                data["data"]["created_at"], "%Y-%m-%dT%H:%M:%S.%fZ"
-            ).strftime("%Y-%m-%d_%H-%M-%S")
+            datetime_string = data["created_at"].strftime("%Y-%m-%d_%H-%M-%S")
         else:
             res = self.client.get_tweets(tweet_ids, **self.get_default_params())
             data = res.data
-            datetime_string = datetime.strptime(
-                data["data"][0]["created_at"], "%Y-%m-%dT%H:%M:%S.%fZ"
-            ).strftime("%Y-%m-%d_%H-%M-%S")
+            datetime_string = data[0]["created_at"].strftime("%Y-%m-%d_%H-%M-%S")
 
         media = res.includes["media"]
         users = res.includes["users"]
