@@ -7,9 +7,9 @@ from pathlib import Path
 from typing import Iterable
 
 import requests
+import tweepy
 from tqdm import tqdm
 
-from .config import BASE_URL_V2
 from .log import logger
 
 NUMERIC_RE = re.compile(r"^\d+$", re.I)
@@ -29,6 +29,7 @@ class Twittaloader:
             raise ValueError("Missing args")
         self.tweet_ids = self.parse_tweet_args(tweet_args)
         self.get_tokens()
+        self.client = tweepy.Client(self.config["TWITTER_BEARER_TOKEN"])
 
     @staticmethod
     def parse_tweet_args(tweet_args: Iterable[str]) -> list[str]:
@@ -63,43 +64,29 @@ class Twittaloader:
 
     def get_default_params(self):
         return {
-            "expansions": ",".join(self.default_expansions),
-            "media.fields": ",".join(self.default_media_fields),
-            "tweet.fields": ",".join(self.default_tweet_fields),
-            "user.fields": ",".join(self.default_tweet_fields),
+            "expansions": self.default_expansions,
+            "media_fields": self.default_media_fields,
+            "tweet_fields": self.default_tweet_fields,
+            "user_fields": self.default_user_fields,
         }
 
     def __call__(self):
         tweet_ids = self.tweet_ids
         if len(tweet_ids) == 1:
-            res = requests.get(
-                f"{BASE_URL_V2}/tweets/{tweet_ids[0]}",
-                headers=self.get_auth_headers(),
-                params=self.get_default_params(),
-            )
-            data = res.json()
-            logger.debug(data)
+            res = self.client.get_tweet(tweet_ids[0], **self.get_default_params())
+            data = res.data
             datetime_string = datetime.strptime(
                 data["data"]["created_at"], "%Y-%m-%dT%H:%M:%S.%fZ"
             ).strftime("%Y-%m-%d_%H-%M-%S")
         else:
-            res = requests.get(
-                f"{BASE_URL_V2}/tweets",
-                headers=self.get_auth_headers(),
-                params={
-                    **self.get_default_params(),
-                    "ids": ",".join(tweet_ids),
-                },
-            )
-            data = res.json()
+            res = self.client.get_tweets(tweet_ids, **self.get_default_params())
+            data = res.data
             datetime_string = datetime.strptime(
                 data["data"][0]["created_at"], "%Y-%m-%dT%H:%M:%S.%fZ"
             ).strftime("%Y-%m-%d_%H-%M-%S")
-        if not res.ok:
-            return logger.error(f"{res.status_code}:\n{res.text}")
 
-        media = data["includes"]["media"]
-        users = data["includes"]["users"]
+        media = res.includes["media"]
+        users = res.includes["users"]
         user_handle = users[0]["username"]
 
         for i, medium in enumerate(tqdm(media)):

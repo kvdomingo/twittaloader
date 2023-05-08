@@ -8,4 +8,4 @@ tasks:
     desc: Build standalone executables for Windows and Linux
     cmds:
       - poetry run pyinstaller -F --clean --name {{.NAME}} setup.py
-      - docker run -v "$(pwd)":/build --rm --env NAME={{.NAME}} --name {{.NAME}}-make-linux --workdir /build kvdomingo/py-cli-builder:latest
+      - docker run -v "$(pwd)":/build --rm --env NAME={{.NAME}} --name {{.NAME}} kvdomingo/py-cli-builder:latest
